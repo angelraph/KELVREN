@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DeadlineCategory {
+  SUBSCRIPTION
+  UTILITY
+  PHONE_INTERNET
+  RENT_MORTGAGE
+  MEMBERSHIP
+  DOMAIN
+  PASSPORT
+  VEHICLE_REGISTRATION
+  INSURANCE
+  PROFESSIONAL_LICENSE
+  PERMIT
+  OTHER
+}
+
+enum DeadlineSource {
+  MANUAL
+  GMAIL_SCAN
+}
+
+enum WatchItemStatus {
+  PENDING
+  AUTO_APPROVED
+  AWAITING_APPROVAL
+  EXECUTED
+  FAILED
+  SNOOZED
+  DISMISSED
+}
+
+enum MandateStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  CONSUMED
+  CANCELLED
+  EXPIRED
+}
+
+enum ChargeStatus {
+  AWAITING_RESULT
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  emailVerified   DateTime?
+  name            String?
+  image           String?
+  passwordHash    String?
+  pravaCustomerId String?   @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  accounts   Account[]
+  sessions   Session[]
+  watchItems WatchItem[]
+  mandates   Mandate[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Mandate {
+  id                 String           @id @default(cuid())
+  userId             String
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category           DeadlineCategory
+  pravaMandateId     String           @unique
+  merchantScope      String
+  merchantName       String?
+  approvedAmount     Decimal
+  currency           String
+  recurringFrequency String
+  status             MandateStatus    @default(PENDING)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  watchItems WatchItem[]
+  charges    Charge[]
+
+  @@index([userId, category])
+}
+
+model WatchItem {
+  id                String           @id @default(cuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category          DeadlineCategory
+  title             String
+  dueDate           DateTime
+  source            DeadlineSource
+  gmailMessageId    String?
+  merchantName      String?
+  merchantUrl       String?
+  estimatedAmount   Decimal?
+  currency          String?
+  status            WatchItemStatus  @default(PENDING)
+  decisionRationale String?
+  mandateId         String?
+  mandate           Mandate?         @relation(fields: [mandateId], references: [id])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  charges Charge[]
+
+  @@index([userId, status])
+  @@index([userId, dueDate])
+}
+
+model Charge {
+  id                 String       @id @default(cuid())
+  watchItemId        String
+  watchItem          WatchItem    @relation(fields: [watchItemId], references: [id], onDelete: Cascade)
+  mandateId          String?
+  mandate            Mandate?     @relation(fields: [mandateId], references: [id])
+  pravaTransactionId String       @unique
+  pravaOrderId       String?
+  amount             Decimal
+  currency           String
+  merchantName       String?
+  status             ChargeStatus @default(AWAITING_RESULT)
+  rationale          String
+  createdAt          DateTime     @default(now())
+  reportedAt         DateTime?
+
+  @@index([watchItemId])
+}
