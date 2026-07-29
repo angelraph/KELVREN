@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth, signOut } from "@/auth";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/password";
+import { NavMenu } from "@/components/NavMenu";
+import { AvatarUpload } from "@/components/AvatarUpload";
 
 function formatDate(d: Date) {
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
@@ -25,7 +27,6 @@ export default async function ProfilePage({
   ]);
 
   const googleConnected = accounts.some((a) => a.provider === "google");
-  const initial = (user.name ?? user.email)[0]?.toUpperCase();
 
   async function updatePassword(formData: FormData) {
     "use server";
@@ -68,19 +69,12 @@ export default async function ProfilePage({
         >
           Kelvren
         </Link>
-        <Link
-          href="/dashboard"
-          className="text-sm text-ink-dim hover:text-ink transition"
-        >
-          Back to dashboard
-        </Link>
+        <NavMenu />
       </header>
 
       <div className="max-w-xl mx-auto px-5 sm:px-8 py-12 sm:py-16 space-y-12">
         <section className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-accent-soft text-accent text-xl font-medium shrink-0">
-            {initial}
-          </div>
+          <AvatarUpload name={user.name} email={user.email} image={user.image} />
           <div>
             <p className="text-lg text-ink">{user.name ?? "Unnamed"}</p>
             <p className="text-sm text-ink-dim">{user.email}</p>
@@ -153,22 +147,6 @@ export default async function ProfilePage({
               className="bg-accent text-paper px-5 py-2 text-sm font-medium tracking-wide hover:opacity-90 transition"
             >
               Save password
-            </button>
-          </form>
-        </section>
-
-        <section>
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/" });
-            }}
-          >
-            <button
-              type="submit"
-              className="text-sm text-warn hover:opacity-80 transition"
-            >
-              Sign out
             </button>
           </form>
         </section>

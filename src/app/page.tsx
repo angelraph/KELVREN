@@ -1,36 +1,33 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/categories";
+import { NavMenu } from "@/components/NavMenu";
 
 const STEPS = [
   {
     n: "01",
-    title: "Connect",
-    body: "Sign in with Google and give Kelvren read-only access to your inbox. Nothing is sent, deleted, or replied to.",
+    title: "You sign in",
+    body: "Sign in with Google. Kelvren asks for permission to read your inbox — not to send, delete, or reply to anything in it.",
   },
   {
     n: "02",
-    title: "Detect",
-    body: "Finds the real deadline, in your inbox or entered by hand, before it becomes urgent.",
+    title: "It watches for bills",
+    body: "It looks for emails about things that expire or need paying: a domain, a passport, a subscription, a utility bill. You can also add one yourself if it's not in your inbox.",
   },
   {
     n: "03",
-    title: "Decide",
-    body: "Checks the cost against the limit you set for that category. Under it, it acts. Over it, it asks.",
+    title: "You set the rules",
+    body: "You pick a monthly limit per category, like \"$50 a month for subscriptions.\" Anything under that limit, Kelvren can pay on its own. Anything over it, it asks you first.",
   },
   {
     n: "04",
-    title: "Settle",
-    body: "Pays through Prava with a single-use card, and leaves a receipt you can check against.",
+    title: "It pays and shows you the receipt",
+    body: "When something's due and it's within your limit, Kelvren pays it through Prava right then, and the receipt shows up on your dashboard.",
   },
 ];
 
 export default async function HomePage() {
   const session = await auth();
-  if (session?.user) {
-    redirect("/dashboard");
-  }
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -38,6 +35,16 @@ export default async function HomePage() {
         <span className="text-sm tracking-[0.25em] uppercase text-ink-dim">
           Kelvren
         </span>
+        {session?.user ? (
+          <NavMenu />
+        ) : (
+          <Link
+            href="/login"
+            className="text-sm text-ink-dim hover:text-ink transition"
+          >
+            Log in
+          </Link>
+        )}
       </header>
 
       <section className="hero-field">
@@ -53,35 +60,46 @@ export default async function HomePage() {
             yes.
           </p>
 
-          <form
-            action={async () => {
-              "use server";
-              await signIn("google", { redirectTo: "/onboarding" });
-            }}
-            className="mt-10"
-          >
-            <button
-              type="submit"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-accent text-paper px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition"
+          {session?.user ? (
+            <Link
+              href="/dashboard"
+              className="mt-10 w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-accent text-paper px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition"
             >
-              Continue with Google
-            </button>
-          </form>
-          <p className="mt-4 text-xs text-ink-dim">
-            We ask for read-only access to scan for renewal notices. Nothing
-            is sent, deleted, or replied to.
-          </p>
-          <p className="mt-6 text-sm text-ink-dim">
-            Prefer email?{" "}
-            <Link href="/login" className="text-accent underline">
-              Log in
-            </Link>{" "}
-            or{" "}
-            <Link href="/signup" className="text-accent underline">
-              sign up
+              Go to dashboard
             </Link>
-            .
-          </p>
+          ) : (
+            <>
+              <form
+                action={async () => {
+                  "use server";
+                  await signIn("google", { redirectTo: "/onboarding" });
+                }}
+                className="mt-10"
+              >
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-accent text-paper px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition"
+                >
+                  Continue with Google
+                </button>
+              </form>
+              <p className="mt-4 text-xs text-ink-dim">
+                We ask for read-only access to scan for renewal notices.
+                Nothing is sent, deleted, or replied to.
+              </p>
+              <p className="mt-6 text-sm text-ink-dim">
+                Prefer email?{" "}
+                <Link href="/login" className="text-accent underline">
+                  Log in
+                </Link>{" "}
+                or{" "}
+                <Link href="/signup" className="text-accent underline">
+                  sign up
+                </Link>
+                .
+              </p>
+            </>
+          )}
         </div>
       </section>
 

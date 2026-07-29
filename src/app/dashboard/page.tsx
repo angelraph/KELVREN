@@ -6,6 +6,7 @@ import { CATEGORY_LABEL } from "@/lib/categories";
 import { ScanGmailButton } from "@/components/ScanGmailButton";
 import { AddDeadlineForm } from "@/components/AddDeadlineForm";
 import { MandateActions } from "@/components/MandateActions";
+import { NavMenu } from "@/components/NavMenu";
 
 function formatDate(d: Date) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -68,18 +69,7 @@ export default async function DashboardPage({
         </Link>
         <div className="flex flex-wrap items-center gap-3 sm:gap-6">
           <ScanGmailButton />
-          <Link
-            href="/onboarding"
-            className="text-sm text-ink-dim hover:text-ink transition"
-          >
-            Add a limit
-          </Link>
-          <Link
-            href="/profile"
-            className="text-sm text-ink-dim hover:text-ink transition"
-          >
-            Profile
-          </Link>
+          <NavMenu />
         </div>
       </header>
 
