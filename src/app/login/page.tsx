@@ -38,9 +38,12 @@ export default async function LoginPage({
   return (
     <main className="min-h-screen">
       <header className="px-5 sm:px-8 py-6 border-b border-line">
-        <span className="text-sm tracking-[0.25em] uppercase text-ink-dim">
+        <Link
+          href="/"
+          className="text-sm tracking-[0.25em] uppercase text-ink-dim hover:text-ink transition"
+        >
           Kelvren
-        </span>
+        </Link>
       </header>
       <div className="max-w-sm mx-auto px-5 sm:px-8 py-16 sm:py-20">
         <h1 className="text-2xl font-medium text-ink">Log in</h1>

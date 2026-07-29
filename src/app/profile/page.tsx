@@ -62,9 +62,12 @@ export default async function ProfilePage({
   return (
     <main className="min-h-screen">
       <header className="px-5 sm:px-8 py-6 border-b border-line flex items-center justify-between">
-        <span className="text-sm tracking-[0.25em] uppercase text-ink-dim">
+        <Link
+          href="/"
+          className="text-sm tracking-[0.25em] uppercase text-ink-dim hover:text-ink transition"
+        >
           Kelvren
-        </span>
+        </Link>
         <Link
           href="/dashboard"
           className="text-sm text-ink-dim hover:text-ink transition"

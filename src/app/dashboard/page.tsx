@@ -60,9 +60,12 @@ export default async function DashboardPage({
   return (
     <main className="min-h-screen">
       <header className="px-5 sm:px-8 py-6 border-b border-line flex flex-wrap items-center justify-between gap-y-3">
-        <span className="text-sm tracking-[0.25em] uppercase text-ink-dim">
+        <Link
+          href="/"
+          className="text-sm tracking-[0.25em] uppercase text-ink-dim hover:text-ink transition"
+        >
           Kelvren
-        </span>
+        </Link>
         <div className="flex flex-wrap items-center gap-3 sm:gap-6">
           <ScanGmailButton />
           <Link

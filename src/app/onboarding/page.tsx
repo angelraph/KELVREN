@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { OnboardForm } from "@/components/OnboardForm";
@@ -15,10 +16,27 @@ export default async function OnboardingPage({
 
   return (
     <main className="min-h-screen">
-      <header className="px-5 sm:px-8 py-6 border-b border-line">
-        <span className="text-sm tracking-[0.25em] uppercase text-ink-dim">
+      <header className="px-5 sm:px-8 py-6 border-b border-line flex items-center justify-between">
+        <Link
+          href="/dashboard"
+          className="text-sm tracking-[0.25em] uppercase text-ink-dim hover:text-ink transition"
+        >
           Kelvren
-        </span>
+        </Link>
+        <div className="flex items-center gap-3 sm:gap-6">
+          <Link
+            href="/dashboard"
+            className="text-sm text-ink-dim hover:text-ink transition"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/profile"
+            className="text-sm text-ink-dim hover:text-ink transition"
+          >
+            Profile
+          </Link>
+        </div>
       </header>
       <div className="max-w-xl mx-auto px-5 sm:px-8 py-12 sm:py-20">
         <h1 className="text-2xl font-medium text-ink">

@@ -3,11 +3,19 @@
 import { useState } from "react";
 import { CATEGORY_LABEL, CATEGORY_DEFAULT_LIMIT, CATEGORY_ORDER } from "@/lib/categories";
 
+const CURRENCIES = [
+  { code: "USD", symbol: "$" },
+  { code: "NGN", symbol: "₦" },
+];
+
 export function OnboardForm() {
   const [category, setCategory] = useState(CATEGORY_ORDER[0]);
   const [limit, setLimit] = useState(String(CATEGORY_DEFAULT_LIMIT[CATEGORY_ORDER[0]]));
+  const [currency, setCurrency] = useState(CURRENCIES[0].code);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const symbol = CURRENCIES.find((c) => c.code === currency)?.symbol ?? "";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -17,7 +25,7 @@ export function OnboardForm() {
       const res = await fetch("/api/prava/onboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category, monthlyLimit: Number(limit), currency: "USD" }),
+        body: JSON.stringify({ category, monthlyLimit: Number(limit), currency }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -58,6 +66,28 @@ export function OnboardForm() {
       </div>
 
       <div>
+        <label className="text-xs uppercase tracking-widest text-ink-dim">
+          Currency
+        </label>
+        <div className="mt-3 flex gap-2">
+          {CURRENCIES.map((c) => (
+            <button
+              type="button"
+              key={c.code}
+              onClick={() => setCurrency(c.code)}
+              className={`px-4 py-2 text-sm border transition ${
+                currency === c.code
+                  ? "border-accent bg-accent-soft text-ink"
+                  : "border-line text-ink-dim hover:border-ink-dim"
+              }`}
+            >
+              {c.code}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
         <label
           htmlFor="limit"
           className="text-xs uppercase tracking-widest text-ink-dim"
@@ -65,7 +95,7 @@ export function OnboardForm() {
           Monthly spend limit
         </label>
         <div className="mt-3 flex items-center gap-2 border border-line px-4 py-3 max-w-xs">
-          <span className="tabular text-ink-dim">$</span>
+          <span className="tabular text-ink-dim">{symbol}</span>
           <input
             id="limit"
             type="number"
