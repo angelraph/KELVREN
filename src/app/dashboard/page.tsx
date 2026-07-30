@@ -2,11 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { CATEGORY_LABEL } from "@/lib/categories";
+import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/categories";
 import { ScanGmailButton } from "@/components/ScanGmailButton";
 import { AddDeadlineForm } from "@/components/AddDeadlineForm";
 import { MandateActions } from "@/components/MandateActions";
 import { NavMenu } from "@/components/NavMenu";
+import type { Mandate } from "@/generated/prisma/client";
 
 function formatDate(d: Date) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -46,6 +47,13 @@ export default async function DashboardPage({
       take: 20,
     }),
   ]);
+
+  const mandateByCategory = new Map<string, Mandate>();
+  for (const m of mandates) {
+    if (!mandateByCategory.has(m.category)) {
+      mandateByCategory.set(m.category, m);
+    }
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -90,8 +98,51 @@ export default async function DashboardPage({
 
         <section>
           <h2 className="text-xs uppercase tracking-widest text-ink-dim">
-            Due within 7 days
+            Set your limits
           </h2>
+          <p className="mt-2 text-xs text-ink-dim max-w-md">
+            Pick a category to set the monthly amount Kelvren can pay on its
+            own. Nothing gets charged in a category until it has a limit.
+          </p>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {CATEGORY_ORDER.map((c) => {
+              const mandate = mandateByCategory.get(c);
+              if (!mandate) {
+                return (
+                  <Link
+                    key={c}
+                    href={`/onboarding?category=${c}`}
+                    className="border border-line px-4 py-3 hover:border-ink-dim transition"
+                  >
+                    <p className="text-sm text-ink">{CATEGORY_LABEL[c]}</p>
+                    <p className="mt-1 text-xs text-accent">Set a limit &rarr;</p>
+                  </Link>
+                );
+              }
+              return (
+                <div key={c} className="border border-accent bg-accent-soft px-4 py-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm text-ink">{CATEGORY_LABEL[c]}</p>
+                    <span className="tabular text-sm text-ink">
+                      {formatMoney(mandate.approvedAmount, mandate.currency)}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-ink-dim">
+                    {mandate.recurringFrequency} &middot; {mandate.status.toLowerCase()}
+                  </p>
+                  <MandateActions mandateId={mandate.id} status={mandate.status} />
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs uppercase tracking-widest text-ink-dim">
+              Due within 7 days
+            </h2>
+          </div>
           <div className="mt-4">
             <AddDeadlineForm />
           </div>
@@ -148,41 +199,6 @@ export default async function DashboardPage({
                   </div>
                   <span className="tabular text-xs text-ink-dim">
                     {item.status.replace(/_/g, " ").toLowerCase()}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-xs uppercase tracking-widest text-ink-dim">
-            Spend limits
-          </h2>
-          <div className="mt-4 border-t border-line">
-            {mandates.length === 0 ? (
-              <p className="py-6 text-sm text-ink-dim">
-                No category has a limit yet.{" "}
-                <Link href="/onboarding" className="text-accent underline">
-                  Set one up
-                </Link>{" "}
-                and Kelvren can start acting inside it.
-              </p>
-            ) : (
-              mandates.map((m) => (
-                <div
-                  key={m.id}
-                  className="py-4 border-b border-line flex flex-wrap items-center justify-between gap-x-4 gap-y-1"
-                >
-                  <div>
-                    <p className="text-sm text-ink">{CATEGORY_LABEL[m.category]}</p>
-                    <p className="text-xs text-ink-dim mt-1">
-                      {m.recurringFrequency} &middot; {m.status.toLowerCase()}
-                    </p>
-                    <MandateActions mandateId={m.id} status={m.status} />
-                  </div>
-                  <span className="tabular text-sm text-ink">
-                    {formatMoney(m.approvedAmount, m.currency)}
                   </span>
                 </div>
               ))

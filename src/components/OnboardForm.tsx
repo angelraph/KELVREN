@@ -2,15 +2,24 @@
 
 import { useState } from "react";
 import { CATEGORY_LABEL, CATEGORY_DEFAULT_LIMIT, CATEGORY_ORDER } from "@/lib/categories";
+import type { DeadlineCategory } from "@/generated/prisma/enums";
 
 const CURRENCIES = [
   { code: "USD", symbol: "$" },
   { code: "NGN", symbol: "₦" },
 ];
 
-export function OnboardForm() {
-  const [category, setCategory] = useState(CATEGORY_ORDER[0]);
-  const [limit, setLimit] = useState(String(CATEGORY_DEFAULT_LIMIT[CATEGORY_ORDER[0]]));
+export function OnboardForm({
+  initialCategory,
+}: {
+  initialCategory?: DeadlineCategory;
+}) {
+  const startCategory =
+    initialCategory && CATEGORY_ORDER.includes(initialCategory)
+      ? initialCategory
+      : CATEGORY_ORDER[0];
+  const [category, setCategory] = useState(startCategory);
+  const [limit, setLimit] = useState(String(CATEGORY_DEFAULT_LIMIT[startCategory]));
   const [currency, setCurrency] = useState(CURRENCIES[0].code);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
