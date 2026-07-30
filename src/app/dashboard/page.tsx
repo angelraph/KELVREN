@@ -7,6 +7,8 @@ import { ScanGmailButton } from "@/components/ScanGmailButton";
 import { AddDeadlineForm } from "@/components/AddDeadlineForm";
 import { MandateActions } from "@/components/MandateActions";
 import { NavMenu } from "@/components/NavMenu";
+import { TopUpForm } from "@/components/TopUpForm";
+import { PayBillForm } from "@/components/PayBillForm";
 import type { Mandate } from "@/generated/prisma/client";
 
 function formatDate(d: Date) {
@@ -131,6 +133,12 @@ export default async function DashboardPage({
                     {mandate.recurringFrequency} &middot; {mandate.status.toLowerCase()}
                   </p>
                   <MandateActions mandateId={mandate.id} status={mandate.status} />
+                  {c === "PHONE_INTERNET" && mandate.status === "ACTIVE" && (
+                    <TopUpForm maxAmount={Number(mandate.approvedAmount)} />
+                  )}
+                  {c === "UTILITY" && mandate.status === "ACTIVE" && (
+                    <PayBillForm maxAmount={Number(mandate.approvedAmount)} />
+                  )}
                 </div>
               );
             })}
