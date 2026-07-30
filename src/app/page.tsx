@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { auth, signIn } from "@/auth";
+import { auth } from "@/auth";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/categories";
 import { NavMenu } from "@/components/NavMenu";
 
@@ -68,37 +68,13 @@ export default async function HomePage() {
               Go to dashboard
             </Link>
           ) : (
-            <>
-              <form
-                action={async () => {
-                  "use server";
-                  await signIn("google", { redirectTo: "/onboarding" });
-                }}
-                className="mt-10"
-              >
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-accent text-paper px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition"
-                >
-                  Continue with Google
-                </button>
-              </form>
-              <p className="mt-4 text-xs text-ink-dim">
-                We ask for read-only access to scan for renewal notices.
-                Nothing is sent, deleted, or replied to.
-              </p>
-              <p className="mt-6 text-sm text-ink-dim">
-                Prefer email?{" "}
-                <Link href="/login" className="text-accent underline">
-                  Log in
-                </Link>{" "}
-                or{" "}
-                <Link href="/signup" className="text-accent underline">
-                  sign up
-                </Link>
-                .
-              </p>
-            </>
+            <p className="mt-10 text-sm text-ink-dim">
+              Use{" "}
+              <Link href="/login" className="text-accent underline">
+                Log in
+              </Link>{" "}
+              at the top right to get started.
+            </p>
           )}
         </div>
       </section>
