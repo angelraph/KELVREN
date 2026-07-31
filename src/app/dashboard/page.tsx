@@ -9,6 +9,7 @@ import { MandateActions } from "@/components/MandateActions";
 import { NavMenu } from "@/components/NavMenu";
 import { TopUpForm } from "@/components/TopUpForm";
 import { PayBillForm } from "@/components/PayBillForm";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import type { Mandate } from "@/generated/prisma/client";
 
 function formatDate(d: Date) {
@@ -85,13 +86,13 @@ export default async function DashboardPage({
 
       <div className="max-w-4xl mx-auto px-5 sm:px-8 py-10 sm:py-16 space-y-12 sm:space-y-16">
         {onboarded === "1" && (
-          <p className="text-sm text-accent bg-accent-soft px-4 py-3">
+          <p className="text-sm text-accent bg-accent-soft rounded-lg px-4 py-3">
             Limit approved. Kelvren can now act inside it.
           </p>
         )}
 
         {scanned !== undefined && (
-          <p className="text-sm text-accent bg-accent-soft px-4 py-3">
+          <p className="text-sm text-accent bg-accent-soft rounded-lg px-4 py-3">
             {scanned === "0"
               ? "Gmail scan complete. No new deadlines found."
               : `Gmail scan complete. Found ${scanned} new deadline${scanned === "1" ? "" : "s"}.`}
@@ -114,24 +115,36 @@ export default async function DashboardPage({
                   <Link
                     key={c}
                     href={`/onboarding?category=${c}`}
-                    className="border border-line px-4 py-3 hover:border-ink-dim transition"
+                    className="card card-interactive flex items-center gap-3 px-4 py-4"
                   >
-                    <p className="text-sm text-ink">{CATEGORY_LABEL[c]}</p>
-                    <p className="mt-1 text-xs text-accent">Set a limit &rarr;</p>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
+                      <CategoryIcon category={c} className="h-5 w-5" />
+                    </span>
+                    <span>
+                      <p className="text-sm text-ink">{CATEGORY_LABEL[c]}</p>
+                      <p className="mt-0.5 text-xs text-accent">Set a limit &rarr;</p>
+                    </span>
                   </Link>
                 );
               }
               return (
-                <div key={c} className="border border-accent bg-accent-soft px-4 py-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm text-ink">{CATEGORY_LABEL[c]}</p>
-                    <span className="tabular text-sm text-ink">
-                      {formatMoney(mandate.approvedAmount, mandate.currency)}
+                <div key={c} className="card px-4 py-4">
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
+                      <CategoryIcon category={c} className="h-5 w-5" />
                     </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm text-ink">{CATEGORY_LABEL[c]}</p>
+                        <span className="tabular text-sm font-medium text-ink">
+                          {formatMoney(mandate.approvedAmount, mandate.currency)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-ink-dim">
+                        {mandate.recurringFrequency} &middot; {mandate.status.toLowerCase()}
+                      </p>
+                    </div>
                   </div>
-                  <p className="mt-1 text-xs text-ink-dim">
-                    {mandate.recurringFrequency} &middot; {mandate.status.toLowerCase()}
-                  </p>
                   <MandateActions mandateId={mandate.id} status={mandate.status} />
                   {c === "PHONE_INTERNET" && mandate.status === "ACTIVE" && (
                     <TopUpForm maxAmount={Number(mandate.approvedAmount)} />
@@ -154,17 +167,17 @@ export default async function DashboardPage({
           <div className="mt-4">
             <AddDeadlineForm />
           </div>
-          <div className="mt-4 border-t border-line">
-            {dueSoon.length === 0 ? (
-              <p className="py-6 text-sm text-ink-dim">
-                Nothing due soon. Kelvren will list anything it detects here
-                before it becomes urgent.
-              </p>
-            ) : (
-              dueSoon.map((item) => (
+          {dueSoon.length === 0 ? (
+            <p className="mt-4 card px-5 py-8 text-sm text-ink-dim text-center">
+              Nothing due soon. Kelvren will list anything it detects here
+              before it becomes urgent.
+            </p>
+          ) : (
+            <div className="mt-4 card divide-y divide-line overflow-hidden">
+              {dueSoon.map((item) => (
                 <div
                   key={item.id}
-                  className="py-4 border-b border-line flex flex-wrap items-center justify-between gap-x-4 gap-y-1"
+                  className="px-5 py-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1"
                 >
                   <div>
                     <p className="text-sm text-ink">{item.title}</p>
@@ -173,30 +186,30 @@ export default async function DashboardPage({
                       {formatDate(item.dueDate)}
                     </p>
                   </div>
-                  <span className="tabular text-xs text-ink-dim">
+                  <span className="tabular text-xs text-ink-dim bg-paper border border-line rounded-full px-2.5 py-1">
                     {item.status.replace(/_/g, " ").toLowerCase()}
                   </span>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section>
           <h2 className="text-xs uppercase tracking-widest text-ink-dim">
             Upcoming
           </h2>
-          <div className="mt-4 border-t border-line">
-            {upcoming.length === 0 ? (
-              <p className="py-6 text-sm text-ink-dim">
-                Nothing further out yet. Connect Gmail scanning to let
-                Kelvren find renewal notices on its own.
-              </p>
-            ) : (
-              upcoming.map((item) => (
+          {upcoming.length === 0 ? (
+            <p className="mt-4 card px-5 py-8 text-sm text-ink-dim text-center">
+              Nothing further out yet. Connect Gmail scanning to let
+              Kelvren find renewal notices on its own.
+            </p>
+          ) : (
+            <div className="mt-4 card divide-y divide-line overflow-hidden">
+              {upcoming.map((item) => (
                 <div
                   key={item.id}
-                  className="py-4 border-b border-line flex flex-wrap items-center justify-between gap-x-4 gap-y-1"
+                  className="px-5 py-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1"
                 >
                   <div>
                     <p className="text-sm text-ink">{item.title}</p>
@@ -205,41 +218,41 @@ export default async function DashboardPage({
                       {formatDate(item.dueDate)}
                     </p>
                   </div>
-                  <span className="tabular text-xs text-ink-dim">
+                  <span className="tabular text-xs text-ink-dim bg-paper border border-line rounded-full px-2.5 py-1">
                     {item.status.replace(/_/g, " ").toLowerCase()}
                   </span>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section>
           <h2 className="text-xs uppercase tracking-widest text-ink-dim">
             Receipts
           </h2>
-          <div className="mt-4 border-t border-line">
-            {charges.length === 0 ? (
-              <p className="py-6 text-sm text-ink-dim">
-                Nothing has been paid yet. Every real charge Kelvren makes
-                will show up here with a reason and a receipt.
-              </p>
-            ) : (
-              charges.map((c) => (
-                <div key={c.id} className="py-4 border-b border-line">
+          {charges.length === 0 ? (
+            <p className="mt-4 card px-5 py-8 text-sm text-ink-dim text-center">
+              Nothing has been paid yet. Every real charge Kelvren makes
+              will show up here with a reason and a receipt.
+            </p>
+          ) : (
+            <div className="mt-4 card divide-y divide-line overflow-hidden">
+              {charges.map((c) => (
+                <div key={c.id} className="px-5 py-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-ink">
                       {c.merchantName ?? c.watchItem.title}
                     </p>
-                    <span className="tabular text-sm text-ink">
+                    <span className="tabular text-sm font-medium text-ink">
                       {formatMoney(c.amount, c.currency)}
                     </span>
                   </div>
                   <p className="text-xs text-ink-dim mt-1">{c.rationale}</p>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </main>

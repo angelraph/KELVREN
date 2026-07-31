@@ -54,17 +54,17 @@ export function AddDeadlineForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 border border-line p-4">
+    <form onSubmit={handleSubmit} className="card space-y-4 p-5">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {CATEGORY_ORDER.map((c) => (
           <button
             type="button"
             key={c}
             onClick={() => setCategory(c)}
-            className={`text-left px-3 py-2 text-xs border transition ${
+            className={`text-left px-3 py-2 text-xs rounded-lg border transition ${
               category === c
                 ? "border-accent bg-accent-soft text-ink"
-                : "border-line text-ink-dim hover:border-ink-dim"
+                : "border-line bg-surface text-ink-dim hover:border-ink-dim"
             }`}
           >
             {CATEGORY_LABEL[c]}
@@ -78,7 +78,7 @@ export function AddDeadlineForm() {
         placeholder="Title (e.g. example.com domain renewal)"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
+        className="w-full bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
       />
 
       <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ export function AddDeadlineForm() {
           required
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          className="bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
+          className="bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
         />
       </div>
 
@@ -97,7 +97,7 @@ export function AddDeadlineForm() {
         placeholder="Merchant (optional)"
         value={merchantName}
         onChange={(e) => setMerchantName(e.target.value)}
-        className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
+        className="w-full bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
       />
 
       <div className="flex items-center gap-2">
@@ -109,7 +109,7 @@ export function AddDeadlineForm() {
           placeholder="Estimated amount (optional)"
           value={estimatedAmount}
           onChange={(e) => setEstimatedAmount(e.target.value)}
-          className="tabular bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none max-w-xs"
+          className="tabular bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 max-w-xs"
         />
       </div>
 
@@ -119,7 +119,7 @@ export function AddDeadlineForm() {
         <button
           type="submit"
           disabled={pending}
-          className="bg-accent text-paper px-5 py-2 text-sm font-medium tracking-wide hover:opacity-90 transition disabled:opacity-50"
+          className="bg-accent text-paper rounded-xl px-5 py-2.5 text-sm font-medium tracking-wide hover:opacity-90 transition disabled:opacity-50 shadow-sm"
         >
           {pending ? "Adding..." : "Add deadline"}
         </button>

@@ -60,22 +60,12 @@ export default async function HomePage() {
             yes.
           </p>
 
-          {session?.user ? (
-            <Link
-              href="/dashboard"
-              className="mt-10 w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-accent text-paper px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition"
-            >
-              Go to dashboard
-            </Link>
-          ) : (
-            <p className="mt-10 text-sm text-ink-dim">
-              Use{" "}
-              <Link href="/login" className="text-accent underline">
-                Log in
-              </Link>{" "}
-              at the top right to get started.
-            </p>
-          )}
+          <Link
+            href={session?.user ? "/dashboard" : "/login"}
+            className="mt-10 w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-accent text-paper rounded-xl px-7 py-3.5 text-sm font-medium tracking-wide hover:opacity-90 transition shadow-sm"
+          >
+            {session?.user ? "Go to dashboard" : "Get started"}
+          </Link>
         </div>
       </section>
 
@@ -84,11 +74,13 @@ export default async function HomePage() {
           <h2 className="text-xs uppercase tracking-widest text-ink-dim">
             How it works
           </h2>
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-6">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {STEPS.map((step) => (
-              <div key={step.n}>
-                <span className="tabular text-xs text-ink-dim">{step.n}</span>
-                <p className="mt-2 text-sm font-medium text-ink">
+              <div key={step.n} className="card card-interactive px-5 py-6">
+                <span className="tabular flex h-7 w-7 items-center justify-center rounded-full bg-accent-soft text-xs text-accent">
+                  {step.n}
+                </span>
+                <p className="mt-4 text-sm font-medium text-ink">
                   {step.title}
                 </p>
                 <p className="mt-2 text-sm text-ink-dim leading-relaxed">
@@ -137,7 +129,7 @@ export default async function HomePage() {
             {CATEGORY_ORDER.filter((c) => c !== "OTHER").map((c) => (
               <span
                 key={c}
-                className="text-xs text-ink-dim border border-line px-3 py-1.5"
+                className="text-xs text-ink-dim bg-surface border border-line rounded-full px-3.5 py-1.5"
               >
                 {CATEGORY_LABEL[c]}
               </span>

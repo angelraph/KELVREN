@@ -21,12 +21,12 @@ export function PasswordInput({
         required
         minLength={minLength}
         placeholder={placeholder}
-        className="w-full bg-transparent border border-line px-3 py-2 pr-16 text-sm text-ink outline-none"
+        className="w-full bg-surface border border-line rounded-xl px-4 py-3 pr-16 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
       />
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-ink-dim hover:text-ink transition"
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-ink-dim hover:text-ink transition"
       >
         {visible ? "Hide" : "Show"}
       </button>

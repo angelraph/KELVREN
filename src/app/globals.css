@@ -9,6 +9,9 @@
   --accent-soft: #e4ebe3;
   --warn: #8a4a1f;
   --warn-soft: #f3e5d5;
+  --surface: #ffffff;
+  --surface-hover: #fbfaf6;
+  --shadow-color: 25 20% 15%;
 }
 
 @theme inline {
@@ -20,6 +23,8 @@
   --color-accent-soft: var(--accent-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -34,6 +39,9 @@
     --accent-soft: #223129;
     --warn: #d99a63;
     --warn-soft: #3a2a1a;
+    --surface: #1c1b15;
+    --surface-hover: #221f18;
+    --shadow-color: 0 0% 0%;
   }
 }
 
@@ -41,6 +49,24 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow:
+    0 1px 2px hsl(var(--shadow-color) / 0.04),
+    0 8px 24px hsl(var(--shadow-color) / 0.05);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.card-interactive:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  box-shadow:
+    0 2px 4px hsl(var(--shadow-color) / 0.05),
+    0 16px 32px hsl(var(--shadow-color) / 0.08);
+  transform: translateY(-2px);
 }
 
 .tabular {

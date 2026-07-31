@@ -5,7 +5,7 @@ import Link from "next/link";
 import { signOutAction } from "@/lib/actions";
 
 const LINKS = [
-  { href: "/", label: "Landing page" },
+  { href: "/", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/onboarding", label: "Add a limit" },
   { href: "/profile", label: "Profile" },
@@ -39,21 +39,22 @@ export function NavMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-48 border border-line bg-paper shadow-sm z-10">
+        <div className="card absolute right-0 mt-3 w-48 py-1.5 z-10 overflow-hidden">
           {LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="block px-4 py-3 text-sm text-ink-dim hover:text-ink hover:bg-accent-soft transition"
+              className="block px-4 py-2.5 text-sm text-ink-dim hover:text-ink hover:bg-accent-soft transition"
             >
               {link.label}
             </Link>
           ))}
+          <div className="my-1.5 h-px bg-line" />
           <form action={signOutAction}>
             <button
               type="submit"
-              className="w-full text-left px-4 py-3 text-sm text-warn hover:bg-warn-soft transition"
+              className="w-full text-left px-4 py-2.5 text-sm text-warn hover:bg-warn-soft transition"
             >
               Sign out
             </button>

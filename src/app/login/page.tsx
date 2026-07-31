@@ -5,6 +5,8 @@ import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { resendVerificationEmail } from "@/lib/actions";
 import { PasswordInput } from "@/components/PasswordInput";
+import { SubmitButton } from "@/components/SubmitButton";
+import { GoogleIcon } from "@/components/GoogleIcon";
 
 export default async function LoginPage({
   searchParams,
@@ -41,8 +43,8 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="min-h-screen">
-      <header className="px-5 sm:px-8 py-6 border-b border-line">
+    <main className="min-h-screen hero-field">
+      <header className="px-5 sm:px-8 py-6">
         <Link
           href="/"
           className="text-sm tracking-[0.25em] uppercase text-ink-dim hover:text-ink transition"
@@ -50,79 +52,79 @@ export default async function LoginPage({
           Kelvren
         </Link>
       </header>
-      <div className="max-w-sm mx-auto px-5 sm:px-8 py-16 sm:py-20">
-        <h1 className="text-2xl font-medium text-ink">Log in</h1>
+      <div className="max-w-sm mx-auto px-5 sm:px-8 py-10 sm:py-16">
+        <div className="card px-6 py-8 sm:px-8 sm:py-10">
+          <h1 className="text-2xl font-medium text-ink">Log in</h1>
 
-        {verified && (
-          <p className="mt-6 text-sm text-accent bg-accent-soft px-4 py-3">
-            Email confirmed. Log in below.
-          </p>
-        )}
+          {verified && (
+            <p className="mt-6 text-sm text-accent bg-accent-soft rounded-lg px-4 py-3">
+              Email confirmed. Log in below.
+            </p>
+          )}
 
-        {error && error !== "unverified" && (
-          <p className="mt-6 text-sm text-warn bg-warn-soft px-4 py-3">
-            {error === "no_password"
-              ? "That email is registered with Google. Use \"Continue with Google\" below instead of a password."
-              : "Wrong email or password. Try again."}
-          </p>
-        )}
+          {error && error !== "unverified" && (
+            <p className="mt-6 text-sm text-warn bg-warn-soft rounded-lg px-4 py-3">
+              {error === "no_password"
+                ? "That email is registered with Google. Use \"Continue with Google\" below instead of a password."
+                : "Wrong email or password. Try again."}
+            </p>
+          )}
 
-        {error === "unverified" && unverifiedEmail && (
-          <div className="mt-6 text-sm text-warn bg-warn-soft px-4 py-3">
-            <p>Confirm your email before logging in. We can send a new link.</p>
-            <form action={resendVerificationEmail} className="mt-3">
-              <input type="hidden" name="email" value={unverifiedEmail} />
-              <button
-                type="submit"
-                className="underline text-accent font-medium"
-              >
-                Resend confirmation email
-              </button>
-            </form>
-          </div>
-        )}
+          {error === "unverified" && unverifiedEmail && (
+            <div className="mt-6 text-sm text-warn bg-warn-soft rounded-lg px-4 py-3">
+              <p>Confirm your email before logging in. We can send a new link.</p>
+              <form action={resendVerificationEmail} className="mt-3">
+                <input type="hidden" name="email" value={unverifiedEmail} />
+                <button type="submit" className="underline text-accent font-medium">
+                  Resend confirmation email
+                </button>
+              </form>
+            </div>
+          )}
 
-        <form
-          action={async () => {
-            "use server";
-            await signIn("google", { redirectTo: "/dashboard" });
-          }}
-          className="mt-8"
-        >
-          <button
-            type="submit"
-            className="w-full inline-flex items-center justify-center gap-3 border border-line px-6 py-3 text-sm font-medium tracking-wide text-ink hover:border-ink-dim transition"
+          <form
+            action={async () => {
+              "use server";
+              await signIn("google", { redirectTo: "/dashboard" });
+            }}
+            className="mt-8"
           >
-            Continue with Google
-          </button>
-        </form>
+            <button
+              type="submit"
+              className="w-full inline-flex items-center justify-center gap-3 border border-line rounded-xl px-6 py-3 text-sm font-medium tracking-wide text-ink bg-surface hover:bg-surface-hover hover:border-ink-dim transition"
+            >
+              <GoogleIcon className="h-4 w-4" />
+              Continue with Google
+            </button>
+          </form>
 
-        <div className="mt-8 flex items-center gap-4">
-          <div className="h-px flex-1 bg-line" />
-          <span className="text-xs uppercase tracking-widest text-ink-dim">
-            or
-          </span>
-          <div className="h-px flex-1 bg-line" />
+          <div className="mt-8 flex items-center gap-4">
+            <div className="h-px flex-1 bg-line" />
+            <span className="text-xs uppercase tracking-widest text-ink-dim">
+              or
+            </span>
+            <div className="h-px flex-1 bg-line" />
+          </div>
+
+          <form action={login} className="mt-8 space-y-4">
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="Email"
+              className="w-full bg-surface border border-line rounded-xl px-4 py-3 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+            />
+            <PasswordInput name="password" placeholder="Password" />
+            <SubmitButton
+              pendingText="Logging in..."
+              className="w-full bg-accent text-paper rounded-xl px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition shadow-sm"
+            >
+              Log in
+            </SubmitButton>
+          </form>
         </div>
 
-        <form action={login} className="mt-8 space-y-4">
-          <input
-            type="email"
-            name="email"
-            required
-            placeholder="Email"
-            className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
-          />
-          <PasswordInput name="password" placeholder="Password" />
-          <button
-            type="submit"
-            className="w-full sm:w-auto bg-accent text-paper px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition"
-          >
-            Log in
-          </button>
-        </form>
-
-        <p className="mt-6 text-sm text-ink-dim">
+        <p className="mt-6 text-sm text-ink-dim text-center">
           Need an account?{" "}
           <Link href="/signup" className="text-accent underline">
             Sign up
