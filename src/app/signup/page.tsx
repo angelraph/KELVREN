@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AuthError } from "next-auth";
 import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
+import { issueVerificationEmail } from "@/lib/verification";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export default async function SignupPage({
   searchParams,
@@ -33,15 +34,9 @@ export default async function SignupPage({
 
     const passwordHash = await hashPassword(password);
     await prisma.user.create({ data: { name, email, passwordHash } });
+    await issueVerificationEmail(email, name);
 
-    try {
-      await signIn("credentials", { email, password, redirectTo: "/onboarding" });
-    } catch (err) {
-      if (err instanceof AuthError) {
-        redirect("/login?error=CredentialsSignin");
-      }
-      throw err;
-    }
+    redirect(`/signup/check-email?email=${encodeURIComponent(email)}`);
   }
 
   return (
@@ -103,14 +98,7 @@ export default async function SignupPage({
             placeholder="Email"
             className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
           />
-          <input
-            type="password"
-            name="password"
-            required
-            minLength={8}
-            placeholder="Password (min 8 characters)"
-            className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
-          />
+          <PasswordInput name="password" placeholder="Password (min 8 characters)" minLength={8} />
           <button
             type="submit"
             className="w-full sm:w-auto bg-accent text-paper px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition"

@@ -3,17 +3,19 @@ import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { resendVerificationEmail } from "@/lib/actions";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; email?: string; verified?: string }>;
 }) {
   const session = await auth();
   if (session?.user) {
     redirect("/dashboard");
   }
-  const { error } = await searchParams;
+  const { error, email: unverifiedEmail, verified } = await searchParams;
 
   async function login(formData: FormData) {
     "use server";
@@ -23,6 +25,9 @@ export default async function LoginPage({
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing && !existing.passwordHash) {
       redirect("/login?error=no_password");
+    }
+    if (existing?.passwordHash && !existing.emailVerified) {
+      redirect(`/login?error=unverified&email=${encodeURIComponent(email)}`);
     }
 
     try {
@@ -48,12 +53,33 @@ export default async function LoginPage({
       <div className="max-w-sm mx-auto px-5 sm:px-8 py-16 sm:py-20">
         <h1 className="text-2xl font-medium text-ink">Log in</h1>
 
-        {error && (
+        {verified && (
+          <p className="mt-6 text-sm text-accent bg-accent-soft px-4 py-3">
+            Email confirmed. Log in below.
+          </p>
+        )}
+
+        {error && error !== "unverified" && (
           <p className="mt-6 text-sm text-warn bg-warn-soft px-4 py-3">
             {error === "no_password"
               ? "That email is registered with Google. Use \"Continue with Google\" below instead of a password."
               : "Wrong email or password. Try again."}
           </p>
+        )}
+
+        {error === "unverified" && unverifiedEmail && (
+          <div className="mt-6 text-sm text-warn bg-warn-soft px-4 py-3">
+            <p>Confirm your email before logging in. We can send a new link.</p>
+            <form action={resendVerificationEmail} className="mt-3">
+              <input type="hidden" name="email" value={unverifiedEmail} />
+              <button
+                type="submit"
+                className="underline text-accent font-medium"
+              >
+                Resend confirmation email
+              </button>
+            </form>
+          </div>
         )}
 
         <form
@@ -87,13 +113,7 @@ export default async function LoginPage({
             placeholder="Email"
             className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
           />
-          <input
-            type="password"
-            name="password"
-            required
-            placeholder="Password"
-            className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
-          />
+          <PasswordInput name="password" placeholder="Password" />
           <button
             type="submit"
             className="w-full sm:w-auto bg-accent text-paper px-6 py-3 text-sm font-medium tracking-wide hover:opacity-90 transition"

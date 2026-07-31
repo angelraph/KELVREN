@@ -7,7 +7,14 @@ import { verifyPassword } from "@/lib/password";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "database" },
+  // Auth.js never persists a database Session row for the Credentials
+  // provider (there's no way to re-verify a password on later requests),
+  // it always issues a JWT cookie instead - even when session.strategy is
+  // "database". With "database" configured, reading that cookie back tried
+  // to look it up as a Session row in Postgres, found nothing, and silently
+  // logged the user right back out. Google keeps working via its own OAuth
+  // Account rows, which are unaffected by session strategy.
+  session: { strategy: "jwt" },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -41,6 +48,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.id = user.id;
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) session.user.id = token.id as string;
+      return session;
+    },
+  },
   events: {
     // The Prisma adapter only writes OAuth tokens to the Account row the
     // first time it links (see auth.js's PrismaAdapter.linkAccount) - it
@@ -49,7 +66,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // access/refresh token from Google that must be persisted, or scope
     // upgrades (like adding gmail.readonly after a user already linked with
     // just profile/email) silently never reach the stored Account.
-    async signIn({ account }) {
+    async signIn({ user, account }) {
       if (account?.provider !== "google") return;
       await prisma.account.updateMany({
         where: { provider: "google", providerAccountId: account.providerAccountId },
@@ -62,6 +79,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token_type: account.token_type,
         },
       });
+      // Google already verifies the email address, so a user who signs in
+      // via Google should never be blocked by our own email-verification gate.
+      if (user.id) {
+        await prisma.user.updateMany({
+          where: { id: user.id, emailVerified: null },
+          data: { emailVerified: new Date() },
+        });
+      }
     },
   },
 });
