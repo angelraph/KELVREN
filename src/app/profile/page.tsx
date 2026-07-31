@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth, signIn } from "@/auth";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { NavMenu } from "@/components/NavMenu";
@@ -108,20 +108,9 @@ export default async function ProfilePage({
             </div>
             <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm text-ink-dim">Google account</span>
-              {googleConnected ? (
-                <span className="text-sm text-ink">Connected</span>
-              ) : (
-                <form
-                  action={async () => {
-                    "use server";
-                    await signIn("google", { redirectTo: "/profile" });
-                  }}
-                >
-                  <button type="submit" className="text-sm text-accent underline">
-                    Connect
-                  </button>
-                </form>
-              )}
+              <span className="text-sm text-ink">
+                {googleConnected ? "Connected" : "Not connected"}
+              </span>
             </div>
             <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm text-ink-dim">Email password</span>
