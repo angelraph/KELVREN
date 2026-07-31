@@ -119,6 +119,16 @@ export default async function DashboardPage({
           </p>
         )}
 
+        {!gmailConnected && (
+          <p className="text-xs text-ink-dim bg-surface border border-line rounded-lg px-4 py-3">
+            Your password gets you into Kelvren, but it can&apos;t read your
+            inbox - Google requires a separate permission grant for that,
+            even if it&apos;s the same email address. &ldquo;Connect
+            Google&rdquo; links your existing account to Gmail; it won&apos;t
+            create a new one.
+          </p>
+        )}
+
         <section>
           <h2 className="text-xs uppercase tracking-widest text-ink-dim">
             Set your limits

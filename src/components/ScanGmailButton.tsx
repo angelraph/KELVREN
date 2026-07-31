@@ -11,7 +11,8 @@ export function ScanGmailButton() {
     setError(null);
     try {
       const res = await fetch("/api/gmail/scan", { method: "POST" });
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
       if (!res.ok) {
         throw new Error(data.error ?? "Something went wrong");
       }
