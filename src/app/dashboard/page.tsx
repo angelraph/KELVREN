@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/categories";
 import { ScanGmailButton } from "@/components/ScanGmailButton";
@@ -34,7 +34,7 @@ export default async function DashboardPage({
   const { onboarded, scanned } = await searchParams;
   const userId = session.user.id;
 
-  const [watchItems, mandates, charges] = await Promise.all([
+  const [watchItems, mandates, charges, googleAccount] = await Promise.all([
     prisma.watchItem.findMany({
       where: { userId },
       orderBy: { dueDate: "asc" },
@@ -49,7 +49,11 @@ export default async function DashboardPage({
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
+    prisma.account.findFirst({
+      where: { userId, provider: "google", refresh_token: { not: null } },
+    }),
   ]);
+  const gmailConnected = !!googleAccount;
 
   const mandateByCategory = new Map<string, Mandate>();
   for (const m of mandates) {
@@ -79,7 +83,23 @@ export default async function DashboardPage({
           Kelvren
         </Link>
         <div className="flex flex-wrap items-center gap-3 sm:gap-6">
-          <ScanGmailButton />
+          {gmailConnected ? (
+            <ScanGmailButton />
+          ) : (
+            <form
+              action={async () => {
+                "use server";
+                await signIn("google", { redirectTo: "/dashboard" });
+              }}
+            >
+              <button
+                type="submit"
+                className="text-sm text-accent hover:opacity-80 transition"
+              >
+                Connect Google to scan Gmail
+              </button>
+            </form>
+          )}
           <NavMenu />
         </div>
       </header>

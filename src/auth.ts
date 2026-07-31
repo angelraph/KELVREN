@@ -19,6 +19,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // A user who signed up with email/password has no Account row at all,
+      // so connecting Google later (to enable Gmail scanning) is a *new*
+      // Account being linked to their existing User by matching email.
+      // Auth.js refuses this by default (OAuthAccountNotLinked) since an
+      // unverified email could otherwise be hijacked - but Google only ever
+      // reports emails it has itself verified, and our own signup flow
+      // already gates credentials accounts behind email verification, so
+      // linking on email match here doesn't open that hole.
+      allowDangerousEmailAccountLinking: true,
       authorization: {
         params: {
           access_type: "offline",
