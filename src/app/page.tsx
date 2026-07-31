@@ -137,6 +137,18 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-line">
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 py-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-ink-dim">
+          <span>&copy; {new Date().getFullYear()} Kelvren</span>
+          <Link href="/privacy" className="hover:text-ink transition">
+            Privacy
+          </Link>
+          <Link href="/terms" className="hover:text-ink transition">
+            Terms
+          </Link>
+        </div>
+      </footer>
     </main>
   );
 }
