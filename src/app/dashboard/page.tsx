@@ -10,7 +10,6 @@ import { NavMenu } from "@/components/NavMenu";
 import { TopUpForm } from "@/components/TopUpForm";
 import { PayBillForm } from "@/components/PayBillForm";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import type { Mandate } from "@/generated/prisma/client";
 
 function formatDate(d: Date) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -38,24 +37,41 @@ export default async function DashboardPage({
     prisma.watchItem.findMany({
       where: { userId },
       orderBy: { dueDate: "asc" },
+      select: { id: true, title: true, dueDate: true, category: true, status: true },
     }),
     prisma.mandate.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        category: true,
+        approvedAmount: true,
+        currency: true,
+        recurringFrequency: true,
+        status: true,
+      },
     }),
     prisma.charge.findMany({
       where: { watchItem: { userId } },
-      include: { watchItem: true },
       orderBy: { createdAt: "desc" },
       take: 20,
+      select: {
+        id: true,
+        merchantName: true,
+        amount: true,
+        currency: true,
+        rationale: true,
+        watchItem: { select: { title: true } },
+      },
     }),
     prisma.account.findFirst({
       where: { userId, provider: "google", refresh_token: { not: null } },
+      select: { id: true },
     }),
   ]);
   const gmailConnected = !!googleAccount;
 
-  const mandateByCategory = new Map<string, Mandate>();
+  const mandateByCategory = new Map<string, (typeof mandates)[number]>();
   for (const m of mandates) {
     if (!mandateByCategory.has(m.category)) {
       mandateByCategory.set(m.category, m);
