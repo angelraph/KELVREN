@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { auth, signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { NavMenu } from "@/components/NavMenu";
 import { AvatarUpload } from "@/components/AvatarUpload";
+import { SubmitButton } from "@/components/SubmitButton";
 
 function formatDate(d: Date) {
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
@@ -72,8 +73,8 @@ export default async function ProfilePage({
         <NavMenu />
       </header>
 
-      <div className="max-w-xl mx-auto px-5 sm:px-8 py-12 sm:py-16 space-y-12">
-        <section className="flex items-center gap-4">
+      <div className="max-w-xl mx-auto px-5 sm:px-8 py-12 sm:py-16 space-y-8">
+        <section className="card flex items-center gap-4 p-6">
           <AvatarUpload name={user.name} email={user.email} image={user.image} />
           <div>
             <p className="text-lg text-ink">{user.name ?? "Unnamed"}</p>
@@ -82,12 +83,12 @@ export default async function ProfilePage({
         </section>
 
         {saved === "1" && (
-          <p className="text-sm text-accent bg-accent-soft px-4 py-3">
+          <p className="text-sm text-accent bg-accent-soft rounded-lg px-4 py-3">
             Password updated.
           </p>
         )}
         {error && (
-          <p className="text-sm text-warn bg-warn-soft px-4 py-3">
+          <p className="text-sm text-warn bg-warn-soft rounded-lg px-4 py-3">
             {error === "weak"
               ? "New password must be at least 8 characters."
               : "Your current password was incorrect."}
@@ -98,20 +99,31 @@ export default async function ProfilePage({
           <h2 className="text-xs uppercase tracking-widest text-ink-dim">
             Account
           </h2>
-          <div className="mt-4 border-t border-line">
-            <div className="py-4 border-b border-line flex items-center justify-between">
+          <div className="mt-4 card divide-y divide-line overflow-hidden">
+            <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm text-ink-dim">Member since</span>
               <span className="tabular text-sm text-ink">
                 {formatDate(user.createdAt)}
               </span>
             </div>
-            <div className="py-4 border-b border-line flex items-center justify-between">
+            <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm text-ink-dim">Google account</span>
-              <span className="text-sm text-ink">
-                {googleConnected ? "Connected" : "Not connected"}
-              </span>
+              {googleConnected ? (
+                <span className="text-sm text-ink">Connected</span>
+              ) : (
+                <form
+                  action={async () => {
+                    "use server";
+                    await signIn("google", { redirectTo: "/profile" });
+                  }}
+                >
+                  <button type="submit" className="text-sm text-accent underline">
+                    Connect
+                  </button>
+                </form>
+              )}
             </div>
-            <div className="py-4 border-b border-line flex items-center justify-between">
+            <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-sm text-ink-dim">Email password</span>
               <span className="text-sm text-ink">
                 {user.passwordHash ? "Set" : "Not set"}
@@ -124,14 +136,14 @@ export default async function ProfilePage({
           <h2 className="text-xs uppercase tracking-widest text-ink-dim">
             {user.passwordHash ? "Change password" : "Set a password"}
           </h2>
-          <form action={updatePassword} className="mt-4 space-y-4 max-w-xs">
+          <form action={updatePassword} className="card mt-4 p-5 space-y-4 max-w-xs">
             {user.passwordHash && (
               <input
                 type="password"
                 name="currentPassword"
                 required
                 placeholder="Current password"
-                className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
+                className="w-full bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
               />
             )}
             <input
@@ -140,14 +152,14 @@ export default async function ProfilePage({
               required
               minLength={8}
               placeholder="New password (min 8 characters)"
-              className="w-full bg-transparent border border-line px-3 py-2 text-sm text-ink outline-none"
+              className="w-full bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
-            <button
-              type="submit"
-              className="bg-accent text-paper px-5 py-2 text-sm font-medium tracking-wide hover:opacity-90 transition"
+            <SubmitButton
+              pendingText="Saving..."
+              className="bg-accent text-paper rounded-xl px-5 py-2.5 text-sm font-medium tracking-wide hover:opacity-90 transition shadow-sm"
             >
               Save password
-            </button>
+            </SubmitButton>
           </form>
         </section>
       </div>

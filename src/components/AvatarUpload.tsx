@@ -32,12 +32,22 @@ export function AvatarUpload({
   const [preview, setPreview] = useState<string | null>(image);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [viewing, setViewing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const initial = (name ?? email)[0]?.toUpperCase();
 
   function handlePick() {
+    setViewing(false);
     inputRef.current?.click();
+  }
+
+  function handleAvatarClick() {
+    if (preview) {
+      setViewing(true);
+    } else {
+      handlePick();
+    }
   }
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -78,38 +88,72 @@ export function AvatarUpload({
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <button
-        type="button"
-        onClick={handlePick}
-        disabled={pending}
-        className="relative flex items-center justify-center w-14 h-14 rounded-full bg-accent-soft text-accent text-xl font-medium shrink-0 overflow-hidden disabled:opacity-50"
-      >
-        {preview ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="" className="w-full h-full object-cover" />
-        ) : (
-          initial
-        )}
-      </button>
-      <div>
+    <>
+      <div className="flex items-center gap-4">
         <button
           type="button"
-          onClick={handlePick}
+          onClick={handleAvatarClick}
           disabled={pending}
-          className="text-sm text-accent underline disabled:opacity-50"
+          className="relative flex items-center justify-center w-16 h-16 rounded-full bg-accent-soft text-accent text-xl font-medium shrink-0 overflow-hidden ring-1 ring-line hover:opacity-90 transition disabled:opacity-50"
         >
-          {pending ? "Uploading..." : preview ? "Change photo" : "Add a photo"}
+          {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={preview} alt="" className="w-full h-full object-cover" />
+          ) : (
+            initial
+          )}
         </button>
-        {error && <p className="mt-1 text-xs text-warn">{error}</p>}
+        <div>
+          <button
+            type="button"
+            onClick={preview ? () => setViewing(true) : handlePick}
+            disabled={pending}
+            className="text-sm text-accent underline disabled:opacity-50"
+          >
+            {pending ? "Uploading..." : preview ? "View photo" : "Add a photo"}
+          </button>
+          {error && <p className="mt-1 text-xs text-warn">{error}</p>}
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFile}
+          className="hidden"
+        />
       </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFile}
-        className="hidden"
-      />
-    </div>
+
+      {viewing && preview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-5"
+          onClick={() => setViewing(false)}
+        >
+          <div className="card p-6 max-w-xs w-full text-center" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={preview}
+              alt=""
+              className="mx-auto w-48 h-48 rounded-full object-cover ring-1 ring-line"
+            />
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={handlePick}
+                className="bg-accent text-paper rounded-xl px-5 py-2.5 text-sm font-medium tracking-wide hover:opacity-90 transition"
+              >
+                Change photo
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewing(false)}
+                className="text-sm text-ink-dim hover:text-ink transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
